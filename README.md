@@ -10,6 +10,16 @@ I'm also using [Trezor's Blockbook](https://github.com/trezor/blockbook) codebas
 To run this project.
 
 ```sh
- chmod +x ./start.sh    // grant permissions to the start script
+ chmod +x ./start.sh    # grant permissions to the start script
 ./start.sh
 ```
+
+Learning Resources
+
+[Go Ethereum Book](https://goethereumbook.org/)
+
+[Go by example](https://gobyexample.com/)
+
+Other Similar Indexer projects worth studying:
+- [Tezos Indexer](https://github.com/blockwatch-cc/tzindex) written in Go
+- [BlockStream Electrs And Esplora ](https://github.com/Blockstream/electrs) written in Rust
