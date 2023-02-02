@@ -67,6 +67,7 @@ func (s *Server) loadRoutes() {
 	serveMux.HandleFunc("/api/chainId", s.handler.jsonWrapper(s.handler.getChainId))
 
 	serveMux.HandleFunc("/api/balance/", s.handler.jsonWrapper(s.handler.getAccountBalance))
+	serveMux.HandleFunc("/api/nonce/", s.handler.jsonWrapper(s.handler.getNonce))
 
 	serveMux.HandleFunc("/api/block/", s.handler.jsonWrapper(s.handler.getBlock))
 

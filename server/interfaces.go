@@ -8,6 +8,9 @@ type AccountBalanceResponse struct {
 	Balance string `json:"balance"`
 }
 
+type AccountNonceResponse struct {
+	Nonce uint64 `json:"nonce"`
+}
 
 type APIErrorResponse struct {
 	Message string `json:"message"`

@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math"
-	"math/big"
 
 	// "fmt"
 
@@ -72,19 +70,9 @@ func (ap *ApiHandler) getChainId(r *http.Request) (interface{}, error) {
 	return result, nil
 }
 
-func toMainDenomination(value *big.Int) *big.Float {
-	wei := big.NewFloat(math.Pow(10, 18))
-
-	valueFloat := new(big.Float).SetInt(value)
-
-	return new(big.Float).Quo(valueFloat, wei)
-
-}
-
 func (ap *ApiHandler) getAccountBalance(r *http.Request) (interface{}, error) {
 
-	i := strings.LastIndexByte(r.URL.Path, '/')
-	address := (r.URL.Path[i+1:])
+	address := GetAccountFromRequestURL(r.URL.Path)
 
 	if len(address) == 0 {
 		return nil, errors.New("address is required")
@@ -95,7 +83,22 @@ func (ap *ApiHandler) getAccountBalance(r *http.Request) (interface{}, error) {
 	balance, _ := ap.ethClient.BalanceAt(ctx, common.HexToAddress(address), nil)
 
 	return &AccountBalanceResponse{
-		Balance: toMainDenomination(balance).String(),
+		Balance: balance.String(),
+	}, nil
+
+}
+
+func (ap *ApiHandler) getNonce(r *http.Request) (interface{}, error) {
+	address := GetAccountFromRequestURL(r.URL.Path)
+
+	if len(address) == 0 {
+		return nil, errors.New("address is required")
+	}
+
+	nonce, _ := ap.ethClient.PendingNonceAt(context.Background(), common.HexToAddress(address))
+
+	return &AccountNonceResponse{
+		Nonce: nonce,
 	}, nil
 
 }
