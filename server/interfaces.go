@@ -1,7 +1,9 @@
 package server
 
+import "math/big"
+
 type ChainIDResponse struct {
-	ChainId string `json:"chainId"`
+	ChainId *big.Int `json:"chainId"`
 }
 
 type AccountBalanceResponse struct {
@@ -14,13 +16,12 @@ type AccountNonceResponse struct {
 
 type APIErrorResponse struct {
 	Message string `json:"message"`
-	Status  uint16 `json:"status"`
 }
 
 type TransactionCreateRequestBody struct {
 	RawHex string `json:"rawHex"`
 }
 
-type TransactionCreateResponse struct{
+type TransactionCreateResponse struct {
 	TxId string `json:"txId"`
 }
