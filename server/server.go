@@ -75,6 +75,8 @@ func (s *Server) loadRoutes() {
 
 	serveMux.HandleFunc("/api/tx/", s.handler.jsonWrapper(s.handler.getTransaction))
 
+	serveMux.HandleFunc("/api/tx-receipt/", s.handler.jsonWrapper(s.handler.getTransactionReceipt))
+
 }
 
 func dialRpc(url string) (*rpc.Client, *ethclient.Client, error) {

@@ -172,3 +172,17 @@ func (ap *ApiHandler) getTransaction(r *http.Request) (interface{}, int, error) 
 
 	return tx, http.StatusOK, err
 }
+
+func (ap *ApiHandler) getTransactionReceipt(r *http.Request) (interface{}, int, error) {
+	txId := GetParamFromRequestURL(r.URL.Path)
+
+	fmt.Println("TransactionId", txId)
+
+	txReceipt, err := ap.ethClient.TransactionReceipt(context.Background(), common.HexToHash(txId))
+
+	if err != nil {
+		return nil, http.StatusNotFound, err
+	}
+
+	return txReceipt, http.StatusOK, err
+}
