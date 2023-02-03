@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 
@@ -12,7 +13,9 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rlp"
 
 	// "log"
 	"net/http"
@@ -117,4 +120,40 @@ func (ap *ApiHandler) getBlock(r *http.Request) (interface{}, error) {
 	// block, err := ap.ethClient.HeaderByNumber(context.Background(), new(big.Int).SetUint64(0))
 
 	return block, err
+}
+
+func (ap *ApiHandler) createTransaction(r *http.Request) (interface{}, error) {
+
+	headerContentType := r.Header.Get("Content-Type")
+
+	if headerContentType != "application/json" {
+
+		return nil, errors.New("content Type is not application/json")
+	}
+
+	var txCreateBody TransactionCreateRequestBody
+
+	err := json.NewDecoder(r.Body).Decode(&txCreateBody)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("txCreateBodyRawHex", txCreateBody.RawHex)
+
+	rawTxBytes, decodeStringError := hex.DecodeString(txCreateBody.RawHex)
+
+	if decodeStringError != nil {
+		return nil, decodeStringError
+	}
+
+	tx := new(types.Transaction)
+	rlp.DecodeBytes(rawTxBytes, &tx)
+
+	sendTxErr := ap.ethClient.SendTransaction(context.Background(), tx)
+
+	return &TransactionCreateResponse{
+		TxId: tx.Hash().Hex(),
+	}, sendTxErr
+
 }

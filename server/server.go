@@ -71,6 +71,8 @@ func (s *Server) loadRoutes() {
 
 	serveMux.HandleFunc("/api/block/", s.handler.jsonWrapper(s.handler.getBlock))
 
+	serveMux.HandleFunc("/api/tx", s.handler.jsonWrapper(s.handler.createTransaction))
+
 }
 
 func dialRpc(url string) (*rpc.Client, *ethclient.Client, error) {

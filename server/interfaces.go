@@ -16,3 +16,11 @@ type APIErrorResponse struct {
 	Message string `json:"message"`
 	Status  uint16 `json:"status"`
 }
+
+type TransactionCreateRequestBody struct {
+	RawHex string `json:"rawHex"`
+}
+
+type TransactionCreateResponse struct{
+	TxId string `json:"txId"`
+}
