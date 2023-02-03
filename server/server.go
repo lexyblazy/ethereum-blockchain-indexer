@@ -60,8 +60,8 @@ func Start(rpcNodeUrl string, port string) {
 func (s *Server) loadRoutes() {
 	serveMux := s.http.Handler.(*http.ServeMux)
 
-	serveMux.HandleFunc("/", s.handler.jsonWrapper(func(r *http.Request) (interface{}, error) {
-		return "Hello there", nil
+	serveMux.HandleFunc("/", s.handler.jsonWrapper(func(r *http.Request) (interface{}, int, error) {
+		return "Hello there", http.StatusOK, nil
 	}))
 
 	serveMux.HandleFunc("/api/chainId", s.handler.jsonWrapper(s.handler.getChainId))
