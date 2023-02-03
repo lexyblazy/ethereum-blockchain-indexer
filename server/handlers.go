@@ -123,7 +123,7 @@ func (ap *ApiHandler) getBlock(r *http.Request) (interface{}, int, error) {
 
 	}
 
-	return block, http.StatusOK, err
+	return block, http.StatusOK, nil
 }
 
 func (ap *ApiHandler) createTransaction(r *http.Request) (interface{}, int, error) {
@@ -170,7 +170,7 @@ func (ap *ApiHandler) getTransaction(r *http.Request) (interface{}, int, error) 
 		return nil, http.StatusNotFound, err
 	}
 
-	return tx, http.StatusOK, err
+	return tx, http.StatusOK, nil
 }
 
 func (ap *ApiHandler) getTransactionReceipt(r *http.Request) (interface{}, int, error) {
@@ -184,5 +184,16 @@ func (ap *ApiHandler) getTransactionReceipt(r *http.Request) (interface{}, int, 
 		return nil, http.StatusNotFound, err
 	}
 
-	return txReceipt, http.StatusOK, err
+	return txReceipt, http.StatusOK, nil
+}
+
+func (ap *ApiHandler) getCurrentGasPrice(r *http.Request) (interface{}, int, error) {
+
+	gasPrice, err := ap.ethClient.SuggestGasPrice(context.Background())
+
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return &GasPriceResponse{Price: gasPrice}, http.StatusOK, nil
 }

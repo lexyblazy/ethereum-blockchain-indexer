@@ -25,3 +25,7 @@ type TransactionCreateRequestBody struct {
 type TransactionCreateResponse struct {
 	TxId string `json:"txId"`
 }
+
+type GasPriceResponse struct{
+	Price *big.Int `json:"gasPrice"`
+}

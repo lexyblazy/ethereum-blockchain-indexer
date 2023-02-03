@@ -76,6 +76,7 @@ func (s *Server) loadRoutes() {
 	serveMux.HandleFunc("/api/tx/", s.handler.jsonWrapper(s.handler.getTransaction))
 
 	serveMux.HandleFunc("/api/tx-receipt/", s.handler.jsonWrapper(s.handler.getTransactionReceipt))
+	serveMux.HandleFunc("/api/gas-price", s.handler.jsonWrapper(s.handler.getCurrentGasPrice))
 
 }
 
