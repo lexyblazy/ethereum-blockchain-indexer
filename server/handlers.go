@@ -6,20 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	// "fmt"
-
-	// "fmt"
 	"errors"
-	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rlp"
 
-	// "log"
 	"net/http"
-	// "github.com/ethereum/go-ethereum/log"
 )
 
 type ApiHandler struct {
@@ -75,7 +69,7 @@ func (ap *ApiHandler) getChainId(r *http.Request) (interface{}, error) {
 
 func (ap *ApiHandler) getAccountBalance(r *http.Request) (interface{}, error) {
 
-	address := GetAccountFromRequestURL(r.URL.Path)
+	address := GetParamFromRequestURL(r.URL.Path)
 
 	if len(address) == 0 {
 		return nil, errors.New("address is required")
@@ -92,7 +86,7 @@ func (ap *ApiHandler) getAccountBalance(r *http.Request) (interface{}, error) {
 }
 
 func (ap *ApiHandler) getNonce(r *http.Request) (interface{}, error) {
-	address := GetAccountFromRequestURL(r.URL.Path)
+	address := GetParamFromRequestURL(r.URL.Path)
 
 	if len(address) == 0 {
 		return nil, errors.New("address is required")
@@ -108,8 +102,7 @@ func (ap *ApiHandler) getNonce(r *http.Request) (interface{}, error) {
 
 func (ap *ApiHandler) getBlock(r *http.Request) (interface{}, error) {
 
-	i := strings.LastIndexByte(r.URL.Path, '/')
-	blockHash := (r.URL.Path[i+1:])
+	blockHash := GetParamFromRequestURL(r.URL.Path)
 
 	if len(blockHash) == 0 {
 		return nil, errors.New("blockHash is required")
@@ -156,4 +149,14 @@ func (ap *ApiHandler) createTransaction(r *http.Request) (interface{}, error) {
 		TxId: tx.Hash().Hex(),
 	}, sendTxErr
 
+}
+
+func (ap *ApiHandler) getTransaction(r *http.Request) (interface{}, error) {
+	txId := GetParamFromRequestURL(r.URL.Path)
+
+	fmt.Println("TransactionId", txId)
+
+	tx, _, err := ap.ethClient.TransactionByHash(context.Background(), common.HexToHash(txId))
+
+	return tx, err
 }

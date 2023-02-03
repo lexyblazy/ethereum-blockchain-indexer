@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func GetAccountFromRequestURL(urlPath string) string {
+func GetParamFromRequestURL(urlPath string) string {
 	i := strings.LastIndexByte(urlPath, '/')
 	return (urlPath[i+1:])
 }
