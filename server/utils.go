@@ -15,3 +15,8 @@ func IsJsonContentType(r *http.Request) bool {
 
 	return headerContentType == "application/json"
 }
+
+func IsPostRequest(r *http.Request) bool {
+
+	return r.Method == "POST"
+}

@@ -28,7 +28,7 @@ func (ap *ApiHandler) jsonWrapper(handler func(r *http.Request) (interface{}, in
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		if !IsJsonContentType(r) {
+		if IsPostRequest(r) && !IsJsonContentType(r) {
 			w.WriteHeader(http.StatusUnsupportedMediaType)
 			w.Write([]byte("content Type is not application/json"))
 
