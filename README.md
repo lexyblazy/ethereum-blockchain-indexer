@@ -13,6 +13,18 @@ To run this project.
 ./start.sh
 ```
 
+
+### RocksDB Setup
+
+It's very important to get the use the correct versions. There seems to be a lot of breaking changes and compatibility issues between the versions. So use the below versions
+
+- [RocksDB ](https://github.com/facebook/rocksdb) - `v7.9.2`
+- [GoRocksDB](https://github.com/linxGnu/grocksdb)  - `v1.7.15`
+
+When properly setup a `data` directory is created in the root folder when the server starts up.
+
+
+
 #### Learning Resources
 
 [Go Ethereum Book](https://goethereumbook.org/)
