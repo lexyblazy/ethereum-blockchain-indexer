@@ -2,24 +2,24 @@ package main
 
 import (
 	"flag"
-	"log"
 	// "fmt"
+	"ganache/indexer/db"
 	"ganache/indexer/server"
+	"log"
 )
 
 func main() {
-
-	rpcNodeUrlPtr := flag.String("rpcnodeurl", "", "the rpc node url")
-	portPtr := flag.String("port", "", "the server port")
+	rpcNodeUrl := flag.String("rpcnodeurl", "", "the rpc node url")
+	port := flag.String("port", "", "the server port")
+	dataDir := flag.String("datadir", "", "path to database directory")
+	dbCache := flag.Int("dbcache", 1<<29, "size of the rocksdb cache")
 
 	flag.Parse()
 
-	rpcNodeUrl := *rpcNodeUrlPtr
-	port := *portPtr
-
-	if len(port) == 0 {
+	if len(*port) == 0 {
 		log.Fatal("port is missing")
 	}
 
-	server.Start(rpcNodeUrl, port)
+	db.NewConn(*dataDir, *dbCache)
+	server.Start(*rpcNodeUrl, *port)
 }
