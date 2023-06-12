@@ -2,41 +2,26 @@ package server
 
 import (
 	"fmt"
+	"indexer/db"
 	// "context"
 	// "encoding/json"
 	// "errors"
 	"log"
 	"net/http"
+
 	// "strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rpc"
 )
 
 type Server struct {
 	http    *http.Server
 	handler *ApiHandler
+	db      *db.RocksDB
 }
 
-const DEFAULT_RPC_NODE_URL = "http://127.0.0.1:7545"
-
-func Start(rpcNodeUrl string, port string) {
+func Start(ec *ethclient.Client, db *db.RocksDB, port string) {
 	serveMux := http.NewServeMux()
-
-	var nodeUrl string
-
-	if len(rpcNodeUrl) == 0 {
-		nodeUrl = DEFAULT_RPC_NODE_URL
-	} else {
-		nodeUrl = rpcNodeUrl
-	}
-
-	fmt.Println("NodeUrl", nodeUrl)
-	_, ec, err := dialRpc(nodeUrl)
-
-	if err != nil {
-		log.Fatal("Failed to connect to RPC_NODE ", nodeUrl)
-	}
 
 	httpInterface := &http.Server{
 		Addr:    port,
@@ -50,9 +35,11 @@ func Start(rpcNodeUrl string, port string) {
 	serverInstance := &Server{
 		http:    httpInterface,
 		handler: ap,
+		db:      db,
 	}
 
 	serverInstance.loadRoutes()
+
 	log.Println("Server is up and running on ", port, "🚀🚀🚀")
 	log.Fatal(serverInstance.http.ListenAndServe())
 }
@@ -78,16 +65,4 @@ func (s *Server) loadRoutes() {
 	serveMux.HandleFunc("/api/tx-receipt/", s.handler.jsonWrapper(s.handler.getTransactionReceipt))
 	serveMux.HandleFunc("/api/gas-price", s.handler.jsonWrapper(s.handler.getCurrentGasPrice))
 
-}
-
-func dialRpc(url string) (*rpc.Client, *ethclient.Client, error) {
-	rpcClient, err := rpc.Dial(url)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	ethereumClient := ethclient.NewClient(rpcClient)
-
-	return rpcClient, ethereumClient, err
 }
