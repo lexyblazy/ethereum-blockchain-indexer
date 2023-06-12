@@ -1,8 +1,10 @@
 package db
 
 import (
-	gorocksdb "github.com/linxGnu/grocksdb"
+	"encoding/json"
 	"log"
+
+	gorocksdb "github.com/linxGnu/grocksdb"
 )
 
 type RocksDB struct {
@@ -24,14 +26,25 @@ func createDBOptions(dbCacheSize int) *gorocksdb.Options {
 	return opts
 }
 
-func NewConn(path string, dbCacheSize int) *RocksDB {
-
+func openDb(path string, dbCacheSize int) (*gorocksdb.DB, error) {
 	opts := createDBOptions(dbCacheSize)
 
 	db, err := gorocksdb.OpenDb(opts, path)
 
 	if err != nil {
 		log.Fatal("Failed to establish database connection")
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func NewConn(path string, dbCacheSize int) (*RocksDB, error) {
+
+	db, err := openDb(path, dbCacheSize)
+
+	if err != nil {
+		return nil, err
 	}
 
 	return &RocksDB{
@@ -39,6 +52,22 @@ func NewConn(path string, dbCacheSize int) *RocksDB {
 		db:   db,
 		wo:   gorocksdb.NewDefaultWriteOptions(),
 		ro:   gorocksdb.NewDefaultReadOptions(),
+	}, nil
+
+}
+
+func (d *RocksDB) SaveRecord(key string, record struct{}) {
+
+	serializedRecord, err := json.Marshal(record)
+
+	if err != nil {
+		log.Println("Failed to serialize record to byte array")
+		return
 	}
 
+	err2 := d.db.Put(d.wo, []byte(key), serializedRecord)
+
+	if err2 != nil {
+		log.Println("failed to put key", key)
+	}
 }
