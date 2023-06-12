@@ -1,4 +1,4 @@
-module ganache/indexer
+module indexer
 
 go 1.19
 
