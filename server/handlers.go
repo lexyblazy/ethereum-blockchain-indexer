@@ -136,8 +136,6 @@ func (ap *ApiHandler) createTransaction(r *http.Request) (interface{}, int, erro
 		return nil, http.StatusBadRequest, err
 	}
 
-	fmt.Println("txCreateBodyRawHex", txCreateBody.RawHex)
-
 	rawTxBytes, decodeStringError := hex.DecodeString(txCreateBody.RawHex)
 
 	if decodeStringError != nil {
@@ -150,7 +148,7 @@ func (ap *ApiHandler) createTransaction(r *http.Request) (interface{}, int, erro
 	sendTxErr := ap.ethClient.SendTransaction(context.Background(), tx)
 
 	if sendTxErr != nil {
-		return nil, http.StatusInternalServerError, sendTxErr
+		return nil, http.StatusBadRequest, sendTxErr
 	}
 
 	return &TransactionCreateResponse{
