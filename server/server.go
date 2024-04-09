@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"indexer/db"
 	// "context"
 	// "encoding/json"
