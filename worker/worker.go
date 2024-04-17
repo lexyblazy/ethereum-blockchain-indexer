@@ -1,33 +1,30 @@
 package worker
 
 import (
-	"context"
 	"fmt"
+	"indexer/bchain"
 	"indexer/db"
 	"log"
-
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type Worker struct {
-	ec *ethclient.Client
+	bc *bchain.BlockChain
 	db *db.RocksDB
 }
 
-func NewWorker(ec *ethclient.Client, index *db.RocksDB, nodeUrl string) *Worker {
+func NewWorker(bc *bchain.BlockChain, index *db.RocksDB, nodeUrl string) *Worker {
 	return &Worker{
-		ec: ec,
+		bc: bc,
 		db: index,
 	}
 }
 
-func (w *Worker) Sync() {
+func (w *Worker) Sync(fromheight, toHeight int) {
 
-	ctx := context.Background()
-	latestBlock, err := w.ec.BlockNumber(ctx)
+	latestBlock, err := w.bc.GetBestBlockHeight()
 	if err != nil {
 		log.Fatal("Failed to get latest block")
 	}
 
-	fmt.Println("latestBlock", latestBlock)
+	fmt.Println("latestBlock", latestBlock, "fromHeight", fromheight, "toHeight", toHeight)
 }

@@ -1,23 +1,15 @@
 package server
 
 import (
-	"context"
-	"encoding/hex"
 	"encoding/json"
-	"fmt"
-
 	"errors"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rlp"
-
+	"fmt"
+	"indexer/bchain"
 	"net/http"
 )
 
 type ApiHandler struct {
-	ethClient *ethclient.Client
+	bc *bchain.BlockChain
 }
 
 func (a *APIErrorResponse) toJSON() ([]byte, error) {
@@ -59,9 +51,7 @@ func (ap *ApiHandler) jsonWrapper(handler func(r *http.Request) (interface{}, in
 
 func (ap *ApiHandler) getChainId(r *http.Request) (interface{}, int, error) {
 
-	ctx := context.Background()
-
-	chainId, chainIdErr := ap.ethClient.ChainID(ctx)
+	chainId, chainIdErr := ap.bc.GetChainId()
 
 	if chainIdErr != nil {
 
@@ -83,9 +73,7 @@ func (ap *ApiHandler) getAccountBalance(r *http.Request) (interface{}, int, erro
 		return nil, http.StatusBadRequest, errors.New("address is required")
 	}
 
-	ctx := context.Background()
-
-	balance, _ := ap.ethClient.BalanceAt(ctx, common.HexToAddress(address), nil)
+	balance, _ := ap.bc.GetAddressBalance(address)
 
 	return &AccountBalanceResponse{
 		Balance: balance.String(),
@@ -100,7 +88,7 @@ func (ap *ApiHandler) getNonce(r *http.Request) (interface{}, int, error) {
 		return nil, http.StatusBadRequest, errors.New("address is required")
 	}
 
-	nonce, _ := ap.ethClient.PendingNonceAt(context.Background(), common.HexToAddress(address))
+	nonce, _ := ap.bc.GetNonce(address)
 
 	return &AccountNonceResponse{
 		Nonce: nonce,
@@ -116,7 +104,7 @@ func (ap *ApiHandler) getBlock(r *http.Request) (interface{}, int, error) {
 		return nil, http.StatusBadRequest, errors.New("blockHash is required")
 	}
 
-	block, err := ap.ethClient.HeaderByHash(context.Background(), common.HexToHash(blockHash))
+	block, err := ap.bc.GetBlockHeadersByHash(blockHash)
 
 	if err != nil {
 		return nil, http.StatusNotFound, err
@@ -136,23 +124,20 @@ func (ap *ApiHandler) createTransaction(r *http.Request) (interface{}, int, erro
 		return nil, http.StatusBadRequest, err
 	}
 
-	rawTxBytes, decodeStringError := hex.DecodeString(txCreateBody.RawHex)
+	tx, err := ap.bc.CreateTransaction(txCreateBody.RawHex)
 
-	if decodeStringError != nil {
-		return nil, http.StatusInternalServerError, decodeStringError
+	if err != nil {
+		return nil, http.StatusBadRequest, err
 	}
 
-	tx := new(types.Transaction)
-	rlp.DecodeBytes(rawTxBytes, &tx)
+	txHash, err := ap.bc.SendTransaction(tx)
 
-	sendTxErr := ap.ethClient.SendTransaction(context.Background(), tx)
-
-	if sendTxErr != nil {
-		return nil, http.StatusBadRequest, sendTxErr
+	if err != nil {
+		return nil, http.StatusBadRequest, err
 	}
 
 	return &TransactionCreateResponse{
-		TxId: tx.Hash().Hex(),
+		TxId: txHash,
 	}, http.StatusOK, nil
 
 }
@@ -160,9 +145,7 @@ func (ap *ApiHandler) createTransaction(r *http.Request) (interface{}, int, erro
 func (ap *ApiHandler) getTransaction(r *http.Request) (interface{}, int, error) {
 	txId := GetParamFromRequestURL(r.URL.Path)
 
-	fmt.Println("TransactionId", txId)
-
-	tx, _, err := ap.ethClient.TransactionByHash(context.Background(), common.HexToHash(txId))
+	tx, err := ap.bc.GetTransaction((txId))
 
 	if err != nil {
 		return nil, http.StatusNotFound, err
@@ -174,9 +157,7 @@ func (ap *ApiHandler) getTransaction(r *http.Request) (interface{}, int, error) 
 func (ap *ApiHandler) getTransactionReceipt(r *http.Request) (interface{}, int, error) {
 	txId := GetParamFromRequestURL(r.URL.Path)
 
-	fmt.Println("TransactionId", txId)
-
-	txReceipt, err := ap.ethClient.TransactionReceipt(context.Background(), common.HexToHash(txId))
+	txReceipt, err := ap.bc.GetTransactionReceipt(txId)
 
 	if err != nil {
 		return nil, http.StatusNotFound, err
@@ -187,7 +168,7 @@ func (ap *ApiHandler) getTransactionReceipt(r *http.Request) (interface{}, int, 
 
 func (ap *ApiHandler) getCurrentGasPrice(r *http.Request) (interface{}, int, error) {
 
-	gasPrice, err := ap.ethClient.SuggestGasPrice(context.Background())
+	gasPrice, err := ap.bc.GetCurrentGasPrice()
 
 	if err != nil {
 		return nil, http.StatusInternalServerError, err

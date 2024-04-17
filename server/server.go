@@ -7,10 +7,7 @@ import (
 	// "errors"
 	"log"
 	"net/http"
-
 	// "strconv"
-
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type Server struct {
@@ -19,7 +16,7 @@ type Server struct {
 	db      *db.RocksDB
 }
 
-func Start(ec *ethclient.Client, db *db.RocksDB, port string) {
+func Start(db *db.RocksDB, port string) {
 	serveMux := http.NewServeMux()
 
 	httpInterface := &http.Server{
@@ -27,9 +24,7 @@ func Start(ec *ethclient.Client, db *db.RocksDB, port string) {
 		Handler: serveMux,
 	}
 
-	ap := &ApiHandler{
-		ethClient: ec,
-	}
+	ap := &ApiHandler{}
 
 	serverInstance := &Server{
 		http:    httpInterface,
