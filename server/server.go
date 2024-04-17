@@ -1,6 +1,7 @@
 package server
 
 import (
+	"indexer/bchain"
 	"indexer/db"
 	// "context"
 	// "encoding/json"
@@ -16,7 +17,7 @@ type Server struct {
 	db      *db.RocksDB
 }
 
-func Start(db *db.RocksDB, port string) {
+func NewServer(db *db.RocksDB, bc *bchain.BlockChain, port string) *Server {
 	serveMux := http.NewServeMux()
 
 	httpInterface := &http.Server{
@@ -24,21 +25,25 @@ func Start(db *db.RocksDB, port string) {
 		Handler: serveMux,
 	}
 
-	ap := &ApiHandler{}
+	ap := &ApiHandler{
+		bc: bc,
+	}
 
-	serverInstance := &Server{
+	return &Server{
 		http:    httpInterface,
 		handler: ap,
 		db:      db,
 	}
 
-	serverInstance.loadRoutes()
-
-	log.Println("Server is up and running on ", port, "🚀🚀🚀")
-	log.Fatal(serverInstance.http.ListenAndServe())
 }
 
-func (s *Server) loadRoutes() {
+func (s *Server) Start() {
+	s.loadJsonAPIRoutes()
+	log.Println("Server is up and running on ", s.http.Addr, "🚀🚀🚀")
+	log.Fatal(s.http.ListenAndServe())
+}
+
+func (s *Server) loadJsonAPIRoutes() {
 	serveMux := s.http.Handler.(*http.ServeMux)
 
 	serveMux.HandleFunc("/", s.handler.jsonWrapper(func(r *http.Request) (interface{}, int, error) {
