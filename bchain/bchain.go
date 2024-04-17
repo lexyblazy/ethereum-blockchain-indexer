@@ -16,21 +16,13 @@ import (
 )
 
 func newEthClient(rpcNodeUrl string) *ethclient.Client {
-	var nodeUrl string
-	const DEFAULT_RPC_NODE_URL = "http://127.0.0.1:7545"
 
-	if len(rpcNodeUrl) == 0 {
-		nodeUrl = DEFAULT_RPC_NODE_URL
-	} else {
-		nodeUrl = rpcNodeUrl
-	}
+	fmt.Println("RPC_NODE_URL", rpcNodeUrl)
 
-	fmt.Println("NodeUrl", nodeUrl)
-
-	ec, err := ethclient.Dial(nodeUrl)
+	ec, err := ethclient.Dial(rpcNodeUrl)
 
 	if err != nil {
-		log.Fatal("Failed to connect to RPC_NODE ", nodeUrl)
+		log.Fatal("Failed to connect to RPC_NODE_URL ", rpcNodeUrl)
 	}
 
 	return ec

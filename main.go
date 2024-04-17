@@ -11,7 +11,7 @@ import (
 
 
 func main() {
-	rpcNodeUrl := flag.String("rpcnodeurl", "", "the rpc node url")
+	rpcNodeUrl := flag.String("rpcnodeurl", "http://127.0.0.1:7545", "the rpc node url")
 	port := flag.String("port", "", "the server port")
 	dataDir := flag.String("datadir", "", "path to database directory")
 	dbCache := flag.Int("dbcache", 1<<29, "size of the rocksdb cache")
