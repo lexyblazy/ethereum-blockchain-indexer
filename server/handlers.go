@@ -6,7 +6,12 @@ import (
 	"fmt"
 	"indexer/bchain"
 	"net/http"
+	"strconv"
+
+	"github.com/ethereum/go-ethereum/core/types"
 )
+
+const maxUint32 = ^uint32(0)
 
 type ApiHandler struct {
 	bc *bchain.BlockChain
@@ -98,20 +103,37 @@ func (ap *ApiHandler) getNonce(r *http.Request) (interface{}, int, error) {
 
 func (ap *ApiHandler) getBlock(r *http.Request) (interface{}, int, error) {
 
-	blockHash := GetParamFromRequestURL(r.URL.Path)
+	blockIdOrHash := GetParamFromRequestURL(r.URL.Path)
 
-	if len(blockHash) == 0 {
+	var blockHash string
+	var blockHeight uint32
+
+	var block *types.Block
+	var getBlockError error
+
+	if len(blockIdOrHash) == 0 {
 		return nil, http.StatusBadRequest, errors.New("blockHash is required")
 	}
 
-	block, err := ap.bc.GetBlockHeadersByHash(blockHash)
+	value, err := strconv.Atoi(blockIdOrHash)
 
 	if err != nil {
+		blockHash = blockIdOrHash
+		block, getBlockError = ap.bc.GetBlockByHash(blockHash)
+	}
+
+	if err == nil && value < int(maxUint32) {
+		blockHeight = uint32(value)
+		block, getBlockError = ap.bc.GetBlockByHeight(blockHeight)
+	}
+
+	if getBlockError != nil {
 		return nil, http.StatusNotFound, err
 
 	}
 
-	return block, http.StatusOK, nil
+	return block.Header(), http.StatusOK, nil
+
 }
 
 func (ap *ApiHandler) createTransaction(r *http.Request) (interface{}, int, error) {
