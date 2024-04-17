@@ -45,8 +45,15 @@ type BlockChain struct {
 	client *ethclient.Client
 }
 
-func (b *BlockChain) GetBlockHeadersByHash(blockHash string) (*types.Header, error) {
-	return b.client.HeaderByHash(context.Background(), common.HexToHash(blockHash))
+
+func (b *BlockChain) GetBlockByHash(blockHash string) (*types.Block, error) {
+
+	return b.client.BlockByHash(context.Background(), common.HexToHash(blockHash))
+}
+
+func (b *BlockChain) GetBlockByHeight(height uint32) (*types.Block, error) {
+
+	return b.client.BlockByNumber(context.Background(), big.NewInt(int64(height)))
 }
 
 func (b *BlockChain) GetBestBlockHeight() (uint64, error) {
