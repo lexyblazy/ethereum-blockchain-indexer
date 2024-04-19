@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ethereum/go-ethereum/core/types"
 )
 
 const maxUint32 = ^uint32(0)
@@ -108,7 +107,7 @@ func (ap *ApiHandler) getBlock(r *http.Request) (interface{}, int, error) {
 	var blockHash string
 	var blockHeight uint32
 
-	var block *types.Block
+	var block *bchain.Block
 	var getBlockError error
 
 	if len(blockIdOrHash) == 0 {

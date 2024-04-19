@@ -46,12 +46,12 @@ type BlockChain struct {
 }
 
 
-func (b *BlockChain) GetBlockByHash(blockHash string) (*types.Block, error) {
+func (b *BlockChain) GetBlockByHash(blockHash string) (*Block, error) {
 
 	return b.client.BlockByHash(context.Background(), common.HexToHash(blockHash))
 }
 
-func (b *BlockChain) GetBlockByHeight(height uint32) (*types.Block, error) {
+func (b *BlockChain) GetBlockByHeight(height uint32) (*Block, error) {
 
 	return b.client.BlockByNumber(context.Background(), big.NewInt(int64(height)))
 }
