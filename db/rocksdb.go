@@ -1,7 +1,9 @@
 package db
 
 import (
-	"encoding/json"
+	"encoding/binary"
+	// "fmt"
+	// "encoding/json"
 	"log"
 
 	gorocksdb "github.com/linxGnu/grocksdb"
@@ -31,7 +33,6 @@ func createDBOptions(cache *gorocksdb.Cache, maxOpenFiles int) *gorocksdb.Option
 	bbto.SetBlockCache(cache)
 	bbto.SetBlockSize(32 << 10) // 32kB
 	bbto.SetFilterPolicy(gorocksdb.NewBloomFilter(float64(10)))
-
 
 	opts := gorocksdb.NewDefaultOptions()
 	opts.SetBlockBasedTableFactory(bbto)
@@ -77,18 +78,44 @@ func NewConn(path string, dbCacheSize int) (*RocksDB, error) {
 
 }
 
-func (d *RocksDB) SaveRecord(key string, record struct{}) {
+func (d *RocksDB) GetBlock(height uint32) ([]byte, error) {
 
-	serializedRecord, err := json.Marshal(record)
+	key := packUint(height)
+
+	val, err := d.db.GetCF(d.ro, d.cfh[cfHeight], key)
 
 	if err != nil {
-		log.Println("Failed to serialize record to byte array")
-		return
+		return nil, err
 	}
 
-	err2 := d.db.Put(d.wo, []byte(key), serializedRecord)
+	defer val.Free()
 
-	if err2 != nil {
-		log.Println("failed to put key", key)
+	return val.Data(), nil
+
+}
+
+func (d *RocksDB) GetBestBlock() (uint32, string, error) {
+	it := d.db.NewIteratorCF(d.ro, d.cfh[cfHeight])
+
+	defer it.Close()
+
+	if it.SeekToLast(); it.Valid() {
+		bestHeight := unpackUint(it.Key().Data())
+		info := it.Value().Data()
+
+		return bestHeight, string(info), nil
 	}
+
+	return 0, "", nil
+}
+
+func packUint(value uint32) []byte {
+	buf := make([]byte, 4)
+	binary.BigEndian.PutUint32(buf, value)
+
+	return buf
+}
+
+func unpackUint(buf []byte) uint32 {
+	return binary.BigEndian.Uint32(buf)
 }
